@@ -7,8 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("DemoDb"));
+    options.UseSqlite("Data Source=app.db"));
 
 builder.Services.AddCors(options =>
 {
@@ -17,7 +18,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
 
 app.UseHttpsRedirection();
 app.UseCors();
