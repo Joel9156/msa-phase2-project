@@ -74,3 +74,46 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
     the generated file before applying), applied it, then reverted the temporary
     `Program.cs` warning suppression. User verified the app works end-to-end
     afterward.
+14. Implemented streak/points logic in `WalkingController.AddRecord` (goal
+    threshold, streak increment/reset, milestone bonus) — user asked Claude to
+    write it directly this time. Manual testing via Scalar surfaced two real
+    bugs: (a) the streak didn't break on a day the step goal was missed, and
+    (b) records processed out of date order (from a stray leftover test record
+    whose id got reused after the earlier migration reset SQLite's autoincrement
+    counter) skewed the streak/points math. Fixed (a) by breaking the streak to
+    0 on a missed-goal day, with an added guard against `0 % 7 == 0` incorrectly
+    triggering the milestone bonus; documented (b) as a known limitation (real
+    usage always logs "today," so out-of-order dates are a test-data artifact,
+    not expected in practice).
+15. Added a `Tier` computed property (`[NotMapped]`) to `UserProgress` —
+    Sprout Walker / Green Walker / Earth Keeper / Eco Guardian by point
+    thresholds. User asked for the tier names in English; Claude translated
+    them. Explained C# `using`/namespaces from scratch at the user's request,
+    including that IDE auto-import (lightbulb quick-fix) is the normal way
+    developers find these, not memorization.
+16. Researched Gyeonggi Province's real "기후행동 기회소득" (Climate Action
+    Opportunity Income) program via web search at the user's request, since
+    they wanted this project modeled after it. Found: 8,000 steps/day for a
+    cash-equivalent reward, 15-16 eco-activity categories, points convert to
+    regional currency, annual cap. No quiz or streak mechanic exists in the
+    real program — those are original additions to this project. Recommended
+    keeping the 6,000-step threshold (documented as an intentional accessibility
+    choice vs. the real program's 8,000) and framing the quiz/streak/tier system
+    as this project's own gamification layer on top of the real-world concept,
+    for the README's "what's unique" section.
+17. Designed and implemented the daily quiz feature: `QuizQuestion` model
+    (seeded with 6 environment questions via `OnModelCreating`/`HasData`),
+    replaced `UserProgress.HasCompletedTodayQuiz` (bool) with `LastQuizDate`
+    (self-resetting by date comparison), and `QuizController` with
+    `GET /api/Quiz/today` / `POST /api/Quiz/answer`. Key design decision,
+    reached through back-and-forth with the user: quiz eligibility and its
+    point bonus are keyed to the server's real current date and to whether a
+    WalkingRecord already exists for that exact real date — never to arbitrary
+    WalkingRecord.Date values — so backfilling past days can't be used to farm
+    or unlock quizzes out of order. The quiz bonus (30% of the daily goal
+    points) is derived by looking up today's WalkingRecord at answer-time
+    rather than stored/passed around, avoiding a two-way sync between the
+    walking and quiz endpoints. User did the model changes
+    (`QuizQuestion`, `UserProgress`) and `AppDbContext` registration directly;
+    Claude handled the migration and controller and verified the full flow
+    end-to-end via curl (bonus applied correctly, repeat attempts blocked).
