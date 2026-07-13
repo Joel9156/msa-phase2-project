@@ -46,3 +46,31 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
    already-running `dotnet run` process rather than a code error, then guided the
    user through manually testing GET/PUT/DELETE end-to-end via the Scalar UI. All
    three verified working (200 GET-all, 204 PUT, 204 DELETE + follow-up 404).
+10. User pitched the actual gamification concept: daily step-goal points, streak
+    bonuses, monthly totals, a daily environment quiz, and point-based tiers
+    (e.g. "환경 수호신"). Recommended concrete starter point values and a 4-tier
+    scheme; user asked to keep implementation-vs-fabrication honest, which was
+    already the agreed approach.
+11. Discussed whether to persist real user accounts now or later; recommended
+    deferring real auth (register/login/password hashing) until after core
+    features, since it doubles as 1 of the 3 advanced requirements later, and the
+    current free-text `UserName` field on `WalkingRecord`/`UserProgress` needs no
+    rework to add auth on top later.
+12. User decided `distanceKm`/`carbonSavedKg` were unnecessary since all
+    gamification rules are steps-based, and chose to remove them outright (over
+    auto-deriving them from steps). Claude removed the frontend fields directly
+    (user's explicit request) and talked the user through removing the backend
+    model properties and running an EF Core migration themselves.
+13. The user-run migration (`RemoveDistanceAndCarbon`) was generated empty (no
+    `DropColumn` calls) — likely a stale build read by `dotnet ef migrations add`
+    — and got marked "applied" without changing the schema, while the snapshot
+    stayed out of sync. Attempting to fix it via `dotnet ef database update`
+    tripped EF Core's `PendingModelChangesWarning` guard in both directions
+    (couldn't roll forward or back). With the user's permission, Claude fixed it
+    directly: temporarily suppressed `PendingModelChangesWarning` in `Program.cs`,
+    rolled the DB back to `ClimateDbInit`, ran `migrations remove` to delete the
+    broken migration and revert the snapshot, regenerated the migration (this
+    time correctly containing `DropColumn` for both fields, confirmed by reading
+    the generated file before applying), applied it, then reverted the temporary
+    `Program.cs` warning suppression. User verified the app works end-to-end
+    afterward.
