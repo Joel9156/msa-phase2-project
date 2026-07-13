@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react';
 interface WalkingRecord {
     id: number;
     userName: string;
-    distanceKm: number;
     steps: number;
     earnedPoints: number;
-    carbonSavedKg: number;
     date: string;
 }
 
@@ -19,7 +17,6 @@ function WalkingBoard() {
 
     // Controlled-input state for the "add record" form.
     const [userName, setUserName] = useState('');
-    const [distanceKm, setDistanceKm] = useState('');
     const [steps, setSteps] = useState('');
 
     // Pulled out of useEffect so handleSubmit can call it again after a POST.
@@ -44,17 +41,14 @@ function WalkingBoard() {
             },
             body: JSON.stringify({
                 userName,
-                distanceKm: Number(distanceKm), // <input> values are always strings — the backend expects a double
-                steps: Number(steps),
+                steps: Number(steps), // <input> values are always strings — the backend expects an int
                 earnedPoints: Math.round(Number(steps) / 100), // placeholder points formula
-                carbonSavedKg: 0,
                 date: new Date().toISOString(),
             }),
         });
 
         if (response.ok) {
             setUserName('');
-            setDistanceKm('');
             setSteps('');
             fetchRecords(); // re-fetch so the new record shows up in the list
         } else {
@@ -72,14 +66,6 @@ function WalkingBoard() {
                     placeholder="Name"
                     value={userName}
                     onChange={e => setUserName(e.target.value)}
-                    required
-                />
-                <input
-                    type="number"
-                    step="0.1"
-                    placeholder="Distance (km)"
-                    value={distanceKm}
-                    onChange={e => setDistanceKm(e.target.value)}
                     required
                 />
                 <input
@@ -106,7 +92,7 @@ function WalkingBoard() {
                                 borderRadius: '8px'
                             }}
                         >
-                            <strong>{record.userName}</strong> walked {record.distanceKm}km ({record.steps} steps)
+                            <strong>{record.userName}</strong> walked {record.steps} steps
                             <br />
                             <small style={{ color: 'gray' }}>
                                 Date: {record.date.split('T')[0]}
