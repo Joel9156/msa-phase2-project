@@ -11,6 +11,11 @@ public class WalkingController : ControllerBase
 {
     private readonly AppDbContext _context;
 
+    private const int DailyGoalSteps = 6000;
+    private const int DailyGoalPoints = 10;
+    private const int StreakMilestoneDays = 7;
+    private const int StreakBonusPoints = 30;
+
     // Constructor to inject the database context
     public WalkingController(AppDbContext context)
     {
@@ -47,11 +52,60 @@ public class WalkingController : ControllerBase
         // 1. Add the new record to the database context
         _context.WalkingRecords.Add(record);
 
-        // 2. Save changes to the actual app.db file
+        // 2. Update the user's streak/points based on this record
+        await ApplyGamificationRulesAsync(record);
+
+        // 3. Save changes to the actual app.db file
         await _context.SaveChangesAsync();
 
-        // 3. Return 201 Created status with the saved record data
+        // 4. Return 201 Created status with the saved record data
         return CreatedAtAction(nameof(GetRecord), new { id = record.Id }, record);
+    }
+
+    // Advances the daily streak for record.UserName and awards points for
+    // hitting the daily step goal and for reaching a streak milestone.
+    // Creates the UserProgress row on the user's first-ever record.
+    private async Task ApplyGamificationRulesAsync(WalkingRecord record)
+    {
+        var progress = await _context.UserProgresses
+            .FirstOrDefaultAsync(p => p.UserName == record.UserName);
+
+        if (progress == null)
+        {
+            progress = new UserProgress { UserName = record.UserName };
+            _context.UserProgresses.Add(progress);
+        }
+
+        var daysSinceLastActive = (record.Date - progress.LastActiveDate).Days;
+        var metDailyGoal = record.Steps >= DailyGoalSteps;
+
+        if (!metDailyGoal)
+        {
+            // Missed today's goal: streak breaks.
+            progress.CurrentStreak = 0;
+        }
+        else if (daysSinceLastActive == 1)
+        {
+            progress.CurrentStreak += 1;
+        }
+        else if (daysSinceLastActive != 0)
+        {
+            // First-ever record, or a gap of more than a day: streak restarts.
+            progress.CurrentStreak = 1;
+        }
+        // daysSinceLastActive == 0 (a same-day record) leaves the streak unchanged.
+
+        if (metDailyGoal)
+        {
+            progress.TotalPoints += DailyGoalPoints;
+        }
+
+        if (progress.CurrentStreak > 0 && progress.CurrentStreak % StreakMilestoneDays == 0)
+        {
+            progress.TotalPoints += StreakBonusPoints;
+        }
+
+        progress.LastActiveDate = record.Date;
     }
 
     // [Update] Replace an existing walking record
