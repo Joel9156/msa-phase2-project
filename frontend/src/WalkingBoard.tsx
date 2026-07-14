@@ -8,7 +8,7 @@ function WalkingBoard() {
     return (
         <Container size="sm" py="xl">
             <Stack gap="lg">
-                <Title order={2}>🏃 My Walking Records</Title>
+                <Title order={2} c="var(--mantine-color-text)">🏃 My Walking Records</Title>
                 <ProgressCard />
                 <QuizCard />
                 <RecordForm />
