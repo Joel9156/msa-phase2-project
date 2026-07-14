@@ -1,10 +1,12 @@
 using backend.Data;
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class WalkingController : ControllerBase
@@ -22,23 +24,18 @@ public class WalkingController : ControllerBase
         _context = context;
     }
 
-
-
-    // [Read] Get a single walking record by id
+    // [Read] Get all walking records for the logged-in user, sorted by latest date
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<WalkingRecord>>> GetRecords(string? userName)
+    public async Task<ActionResult<IEnumerable<WalkingRecord>>> GetRecords()
     {
-        var query = _context.WalkingRecords.AsQueryable();
+        var userName = User.Identity!.Name!;
 
-        if (!string.IsNullOrEmpty(userName))
-        {
-            query = query.Where(r => r.UserName == userName);
-        }
-
-        return await query
+        return await _context.WalkingRecords
+            .Where(r => r.UserName == userName)
             .OrderByDescending(r => r.Date)
             .ToListAsync();
     }
+
     // [Read] Get a single walking record by id
     [HttpGet("{id}")]
     public async Task<ActionResult<WalkingRecord>> GetRecord(int id)
@@ -53,11 +50,12 @@ public class WalkingController : ControllerBase
         return record;
     }
 
-
     // [Create] Add a new walking record
     [HttpPost]
     public async Task<ActionResult<WalkingRecord>> AddRecord(WalkingRecord record)
     {
+        record.UserName = User.Identity!.Name!;
+
         // 1. Add the new record to the database context
         _context.WalkingRecords.Add(record);
 
@@ -117,7 +115,7 @@ public class WalkingController : ControllerBase
         progress.LastActiveDate = record.Date;
     }
 
-    // [Update] Replace an existing walking record
+    // [Update] Replace an existing walking record (only the owner may do this)
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateRecord(int id, WalkingRecord record)
     {
@@ -126,6 +124,17 @@ public class WalkingController : ControllerBase
             return BadRequest();
         }
 
+        var existing = await _context.WalkingRecords.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+        if (existing == null)
+        {
+            return NotFound();
+        }
+        if (existing.UserName != User.Identity!.Name)
+        {
+            return Forbid();
+        }
+
+        record.UserName = User.Identity!.Name!;
         _context.Entry(record).State = EntityState.Modified;
 
         try
@@ -145,7 +154,7 @@ public class WalkingController : ControllerBase
         return NoContent();
     }
 
-    // [Delete] Remove a walking record
+    // [Delete] Remove a walking record (only the owner may do this)
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRecord(int id)
     {
@@ -153,6 +162,10 @@ public class WalkingController : ControllerBase
         if (record == null)
         {
             return NotFound();
+        }
+        if (record.UserName != User.Identity!.Name)
+        {
+            return Forbid();
         }
 
         _context.WalkingRecords.Remove(record);

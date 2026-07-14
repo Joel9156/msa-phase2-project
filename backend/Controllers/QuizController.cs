@@ -2,19 +2,22 @@ using backend.Data;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace backend.Controllers;
 
 public class QuizAnswerRequest
 {
-    public string UserName { get; set; } = string.Empty;
     public int QuestionId { get; set; }
     public string SelectedOption { get; set; } = string.Empty; // "A" | "B" | "C" | "D"
 }
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class QuizController : ControllerBase
+
 {
     private readonly AppDbContext _context;
 
@@ -31,9 +34,11 @@ public class QuizController : ControllerBase
     // A user is only eligible once they've logged a walking record for today,
     // and only once per real day (independent of any WalkingRecord.Date values).
     [HttpGet("today")]
-    public async Task<ActionResult> GetTodayQuiz(string userName)
+    public async Task<ActionResult> GetTodayQuiz()
     {
+        var userName = User.Identity!.Name!;
         var today = DateTime.UtcNow.Date;
+
 
         var todayRecord = await _context.WalkingRecords
             .FirstOrDefaultAsync(r => r.UserName == userName && r.Date == today);
@@ -83,10 +88,12 @@ public class QuizController : ControllerBase
     [HttpPost("answer")]
     public async Task<ActionResult> SubmitAnswer(QuizAnswerRequest request)
     {
+        var userName = User.Identity!.Name!;
         var today = DateTime.UtcNow.Date;
 
         var todayRecord = await _context.WalkingRecords
-            .FirstOrDefaultAsync(r => r.UserName == request.UserName && r.Date == today);
+            .FirstOrDefaultAsync(r => r.UserName == userName && r.Date == today);
+
 
         if (todayRecord == null)
         {
@@ -94,11 +101,11 @@ public class QuizController : ControllerBase
         }
 
         var progress = await _context.UserProgresses
-            .FirstOrDefaultAsync(p => p.UserName == request.UserName);
+            .FirstOrDefaultAsync(p => p.UserName == userName);
 
         if (progress == null)
         {
-            progress = new UserProgress { UserName = request.UserName };
+            progress = new UserProgress { UserName = userName };
             _context.UserProgresses.Add(progress);
         }
 
