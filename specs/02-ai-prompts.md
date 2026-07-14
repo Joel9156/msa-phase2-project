@@ -118,3 +118,37 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
     (`QuizQuestion`, `UserProgress`) and `AppDbContext` registration directly;
     Claude handled the migration and controller and verified the full flow
     end-to-end via curl (bonus applied correctly, repeat attempts blocked).
+
+## Session — 2026-07-14 (Claude Code)
+
+18. Built JWT authentication end to end: `User` model + unique username index,
+    `AuthController` (register/login, `PasswordHasher<User>`, min-length +
+    uniqueness validation, 7-day JWT), `[Authorize]` added to
+    Walking/Quiz/UserProgress controllers with the acting user now derived
+    from the token claim instead of a client-supplied field (closes the
+    "type anyone's name" impersonation gap), and ownership checks added to
+    `WalkingController`'s PUT/DELETE. User did the model/DbContext/migration
+    steps and the `WalkingController`/`QuizController` `[Authorize]` edits
+    themselves (with Claude fixing a couple of paste-order mistakes);
+    Claude built `AuthController`, the JWT middleware config, and
+    `UserProgressController`'s change, and verified end-to-end via curl.
+19. Wired the frontend to the new auth: `store.ts` holds a JWT (persisted to
+    `localStorage`) instead of a hardcoded username, new `LoginForm`
+    component, `App.tsx` gates the app behind the token. User built
+    `LoginForm` and most of the `store.ts`/`QuizCard.tsx` edits from
+    step-by-step instructions; Claude wired `App.tsx` directly after it broke
+    from paste-ordering mistakes twice on an earlier (pre-auth) edit.
+20. User tested in the browser and found two real bugs beyond what curl
+    testing had caught: (a) logging steps multiple times a day created
+    separate records instead of accumulating, so hitting the goal via two
+    partial entries never awarded points; (b) after fixing (a), a test
+    account showed 40 points from a single crossing — traced to Claude
+    accidentally dropping the `CurrentStreak > 0` guard (added earlier in the
+    session) while rewriting the points logic, letting `0 % 7 == 0` fire the
+    milestone bonus on a streak of zero. Both fixed and re-verified; (a)'s
+    fix also incidentally explained why old pre-fix test records didn't merge
+    (they were stored with real submission timestamps, not the
+    midnight-normalized dates the new code compares against — self-corrects
+    going forward since new records are always normalized server-side).
+    Also found and fixed `QuizCard` never re-checking quiz eligibility after
+    a new walking record was logged (its effect only depended on the token).

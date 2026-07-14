@@ -36,9 +36,11 @@ listed in the README get marked — see `03-design-decisions.md`.
 - [x] Theme switching (light/dark mode) — Mantine `useMantineColorScheme`,
       toggle in the header
 - [x] State management library (Zustand) — `frontend/src/store.ts` shares
-      records/progress/userName across `ProgressCard`/`QuizCard`/`RecordForm`/`RecordList`
-- [ ] Security measures (>= 2) — planned: password hashing + data validation,
-      to be built alongside real login/auth
+      records/progress/token across `ProgressCard`/`QuizCard`/`RecordForm`/`RecordList`
+- [x] Security measures (2): password hashing (`PasswordHasher<User>` in
+      `AuthController`, JWT-based auth on all data endpoints) + data validation
+      (username/password checks on register, per-record ownership checks on
+      PUT/DELETE)
 - [ ] (backup, not started) Caching / API optimization
 
 ## Video (max 6 min)
