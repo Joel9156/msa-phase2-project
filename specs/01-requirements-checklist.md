@@ -16,7 +16,8 @@ Source: `2026 Phase 2 - Software Assessment.pdf`
 
 ### Frontend
 - [x] React + TypeScript
-- [ ] Visually appealing, responsive UI (currently unstyled placeholder)
+- [x] Visually appealing UI (Mantine component library) — responsiveness not yet
+      checked on mobile widths
 - [x] Navigation via React Router
 - [x] Git with regular commit history
 - [ ] Deployed frontend
@@ -29,17 +30,16 @@ Source: `2026 Phase 2 - Software Assessment.pdf`
 
 ## Advanced requirements (pick >= 3, must be listed in README to be marked)
 
-Not yet decided/implemented. Candidates given the gamification theme and current
-stack:
-- Security measures (>=2, e.g. data validation/sanitisation + rate limiting) —
-  natural fit since the API currently accepts unvalidated POST bodies
-- Theme switching (light/dark mode) — cheap, high visual payoff
-- State management library (Zustand) — only worth it once the frontend has more
-  than one piece of shared state (points, streaks, etc.)
-- Caching / API optimization — possible once leaderboard/aggregate endpoints exist
+Target: 4 implemented (3 committed + 1 low-risk backup), since only the top 3
+listed in the README get marked — see `03-design-decisions.md`.
 
-Final selection should be locked in early and reflected here + README once decided,
-since only the first 3 listed in the README get marked.
+- [x] Theme switching (light/dark mode) — Mantine `useMantineColorScheme`,
+      toggle in the header
+- [x] State management library (Zustand) — `frontend/src/store.ts` shares
+      records/progress/userName across `ProgressCard`/`QuizCard`/`RecordForm`/`RecordList`
+- [ ] Security measures (>= 2) — planned: password hashing + data validation,
+      to be built alongside real login/auth
+- [ ] (backup, not started) Caching / API optimization
 
 ## Video (max 6 min)
 - [ ] Part 1: how AI was used during development
