@@ -11,9 +11,12 @@ public class AppDbContext : DbContext
     public DbSet<WalkingRecord> WalkingRecords { get; set; }
     public DbSet<UserProgress> UserProgresses { get; set; }
     public DbSet<QuizQuestion> QuizQuestions { get; set; }
+    public DbSet<User> Users { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>().HasIndex(u => u.UserName).IsUnique();
         modelBuilder.Entity<QuizQuestion>().HasData(
             new QuizQuestion
             {
