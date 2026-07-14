@@ -50,30 +50,55 @@ public class WalkingController : ControllerBase
         return record;
     }
 
-    // [Create] Add a new walking record
+    // [Create] Add steps to today's record for the logged-in user (creating it
+    // if this is their first entry today). Multiple submissions on the same
+    // day accumulate instead of overwriting each other.
     [HttpPost]
     public async Task<ActionResult<WalkingRecord>> AddRecord(WalkingRecord record)
     {
-        record.UserName = User.Identity!.Name!;
+        var userName = User.Identity!.Name!;
+        var today = DateTime.UtcNow.Date;
 
-        // 1. Add the new record to the database context
-        _context.WalkingRecords.Add(record);
+        var existing = await _context.WalkingRecords
+            .FirstOrDefaultAsync(r => r.UserName == userName && r.Date == today);
 
-        // 2. Update the user's streak/points based on this record
-        await ApplyGamificationRulesAsync(record);
+        // Did today already cross the daily goal before this submission?
+        // Used below so we only award points/streak once per day, the moment
+        // the cumulative total first reaches the goal.
+        var wasCounted = existing != null && existing.Steps >= DailyGoalSteps;
 
-        // 3. Save changes to the actual app.db file
+        if (existing != null)
+        {
+            existing.Steps += record.Steps;
+            record = existing;
+        }
+        else
+        {
+            record.UserName = userName;
+            record.Date = today;
+            _context.WalkingRecords.Add(record);
+        }
+
+        await ApplyGamificationRulesAsync(record, wasCounted);
+
         await _context.SaveChangesAsync();
 
-        // 4. Return 201 Created status with the saved record data
         return CreatedAtAction(nameof(GetRecord), new { id = record.Id }, record);
     }
 
-    // Advances the daily streak for record.UserName and awards points for
-    // hitting the daily step goal and for reaching a streak milestone.
-    // Creates the UserProgress row on the user's first-ever record.
-    private async Task ApplyGamificationRulesAsync(WalkingRecord record)
+    // Awards points/streak progress the moment a day's cumulative steps first
+    // cross the daily goal. No-ops if the goal isn't met yet, or was already
+    // met earlier today (wasCounted), so repeated submissions on the same day
+    // never double-count.
+    private async Task ApplyGamificationRulesAsync(WalkingRecord record, bool wasCounted)
     {
+        var metDailyGoal = record.Steps >= DailyGoalSteps;
+
+        if (!metDailyGoal || wasCounted)
+        {
+            return;
+        }
+
         var progress = await _context.UserProgresses
             .FirstOrDefaultAsync(p => p.UserName == record.UserName);
 
@@ -84,28 +109,20 @@ public class WalkingController : ControllerBase
         }
 
         var daysSinceLastActive = (record.Date - progress.LastActiveDate).Days;
-        var metDailyGoal = record.Steps >= DailyGoalSteps;
 
-        if (!metDailyGoal)
-        {
-            // Missed today's goal: streak breaks.
-            progress.CurrentStreak = 0;
-        }
-        else if (daysSinceLastActive == 1)
+        if (daysSinceLastActive == 1)
         {
             progress.CurrentStreak += 1;
         }
         else if (daysSinceLastActive != 0)
         {
-            // First-ever record, or a gap of more than a day: streak restarts.
+            // First-ever goal day, or a gap of more than a day: streak restarts.
             progress.CurrentStreak = 1;
         }
-        // daysSinceLastActive == 0 (a same-day record) leaves the streak unchanged.
+        // daysSinceLastActive == 0 shouldn't happen here since wasCounted would
+        // already be true, but is harmless if it does (streak left unchanged).
 
-        if (metDailyGoal)
-        {
-            progress.TotalPoints += DailyGoalPoints;
-        }
+        progress.TotalPoints += DailyGoalPoints;
 
         if (progress.CurrentStreak > 0 && progress.CurrentStreak % StreakMilestoneDays == 0)
         {
