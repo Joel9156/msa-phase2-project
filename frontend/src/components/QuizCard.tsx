@@ -20,7 +20,10 @@ interface AnswerResult {
 }
 
 function QuizCard() {
-    const userName = useAppStore((state) => state.userName)
+    const token = useAppStore((state) => state.token)
+    const records = useAppStore((state) => state.records)
+
+
     const fetchProgress = useAppStore((state) => state.fetchProgress)
 
     const [status, setStatus] = useState('loading')
@@ -29,7 +32,9 @@ function QuizCard() {
     const [result, setResult] = useState<AnswerResult | null>(null)
 
     useEffect(() => {
-        fetch(`${API_URL}/Quiz/today?userName=${userName}`)
+        fetch(`${API_URL}/Quiz/today`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
             .then((res) => res.json())
             .then((data) => {
                 setStatus(data.status)
@@ -37,18 +42,23 @@ function QuizCard() {
                     setQuestion(data.question)
                 }
             })
-    }, [userName])
+    }, [token, records])
+
 
     async function handleSubmit() {
         const res = await fetch(`${API_URL}/Quiz/answer`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userName, questionId: question!.id, selectedOption: selected }),
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ questionId: question!.id, selectedOption: selected }),
         })
         const data = await res.json()
         setResult(data)
         fetchProgress()
     }
+
 
     if (status === 'loading') {
         return null

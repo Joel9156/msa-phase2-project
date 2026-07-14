@@ -1,6 +1,8 @@
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { useMantineColorScheme, useComputedColorScheme, ActionIcon } from '@mantine/core'
+import { useMantineColorScheme, useComputedColorScheme, ActionIcon, Button } from '@mantine/core'
+import { useAppStore } from './store'
 import WalkingBoard from './WalkingBoard'
+import LoginForm from './components/LoginForm'
 import './App.css'
 
 function ThemeToggle() {
@@ -20,6 +22,9 @@ function ThemeToggle() {
 
 
 export default function App() {
+  const token = useAppStore((state) => state.token)
+  const logout = useAppStore((state) => state.logout)
+
   return (
     <BrowserRouter>
       <header>
@@ -28,11 +33,16 @@ export default function App() {
           <NavLink to="/" end>My Records</NavLink>
         </nav>
         <ThemeToggle />
+        {token && (
+          <Button variant="subtle" color="gray.3" style={{ color: 'white' }} onClick={logout}>
+            Log Out
+          </Button>
+        )}
       </header>
 
       <main>
         <Routes>
-          <Route path="/" element={<WalkingBoard />} />
+          <Route path="/" element={token ? <WalkingBoard /> : <LoginForm />} />
         </Routes>
       </main>
     </BrowserRouter>
