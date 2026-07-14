@@ -20,9 +20,9 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
    as-is — found `App.tsx` was broken (importing deleted `pages/Leaderboard`,
    `pages/About`, `api.ts` from an earlier scaffold) and that no `/specs` folder
    existed yet despite being a hard submission requirement.
-2. Prompt (paraphrased): "먼저해야할거 먼저 해" (do whatever should be prioritized
-   first) — used to decide order of work: fix the broken frontend build first, then
-   scaffold `/specs`.
+2. Prompt (paraphrased): "do whatever should be prioritized first" — used to
+   decide order of work: fix the broken frontend build first, then scaffold
+   `/specs`.
 3. Fixed `App.tsx` to route to `WalkingBoard` instead of the deleted pages; removed
    unused `types.ts` leftover from the original Vite/MSA demo boilerplate.
 4. Ran `npm run build` in `frontend/` to confirm the TypeScript build passes after
@@ -48,7 +48,8 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
    three verified working (200 GET-all, 204 PUT, 204 DELETE + follow-up 404).
 10. User pitched the actual gamification concept: daily step-goal points, streak
     bonuses, monthly totals, a daily environment quiz, and point-based tiers
-    (e.g. "환경 수호신"). Recommended concrete starter point values and a 4-tier
+    (e.g. "Eco Guardian" for the top tier). Recommended concrete starter point
+    values and a 4-tier
     scheme; user asked to keep implementation-vs-fabrication honest, which was
     already the agreed approach.
 11. Discussed whether to persist real user accounts now or later; recommended
@@ -91,8 +92,8 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
     them. Explained C# `using`/namespaces from scratch at the user's request,
     including that IDE auto-import (lightbulb quick-fix) is the normal way
     developers find these, not memorization.
-16. Researched Gyeonggi Province's real "기후행동 기회소득" (Climate Action
-    Opportunity Income) program via web search at the user's request, since
+16. Researched Gyeonggi Province's real "Climate Action Opportunity Income"
+    program via web search at the user's request, since
     they wanted this project modeled after it. Found: 8,000 steps/day for a
     cash-equivalent reward, 15-16 eco-activity categories, points convert to
     regional currency, annual cap. No quiz or streak mechanic exists in the

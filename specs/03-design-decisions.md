@@ -47,7 +47,7 @@
   - Tiers by cumulative `TotalPoints` (computed, not stored):
     0–99 Sprout Walker, 100–299 Green Walker, 300–699 Earth Keeper, 700+ Eco
     Guardian
-  - Inspired by Gyeonggi Province's real "기후행동 기회소득" program
+  - Inspired by Gyeonggi Province's real "Climate Action Opportunity Income" program
     (8,000 steps/day for a cash-equivalent reward across 15-16 eco-activities,
     annual cap, converts to regional currency) — this project intentionally
     narrows scope to walking + quiz, lowers the step threshold to 6,000 for
