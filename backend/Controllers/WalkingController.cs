@@ -22,15 +22,23 @@ public class WalkingController : ControllerBase
         _context = context;
     }
 
-    // [Read] Get all walking records sorted by latest date
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<WalkingRecord>>> GetRecords()
-    {
-        return await _context.WalkingRecords
-        .OrderByDescending(r => r.Date)
-        .ToListAsync();
-    }
 
+
+    // [Read] Get a single walking record by id
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<WalkingRecord>>> GetRecords(string? userName)
+    {
+        var query = _context.WalkingRecords.AsQueryable();
+
+        if (!string.IsNullOrEmpty(userName))
+        {
+            query = query.Where(r => r.UserName == userName);
+        }
+
+        return await query
+            .OrderByDescending(r => r.Date)
+            .ToListAsync();
+    }
     // [Read] Get a single walking record by id
     [HttpGet("{id}")]
     public async Task<ActionResult<WalkingRecord>> GetRecord(int id)
@@ -44,6 +52,7 @@ public class WalkingController : ControllerBase
 
         return record;
     }
+
 
     // [Create] Add a new walking record
     [HttpPost]
