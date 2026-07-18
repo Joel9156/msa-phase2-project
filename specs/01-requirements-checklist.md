@@ -21,7 +21,8 @@ Source: `2026 Phase 2 - Software Assessment.pdf`
       checked on mobile widths
 - [x] Navigation via React Router
 - [x] Git with regular commit history
-- [ ] Deployed frontend
+- [x] Deployed frontend — Azure Static Web Apps,
+      https://agreeable-hill-0bb9bab00.7.azurestaticapps.net
 - [ ] Unit tests covering key frontend components
 
 ### README / repo
