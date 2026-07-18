@@ -11,7 +11,8 @@ Source: `2026 Phase 2 - Software Assessment.pdf`
 - [x] Full CRUD (Create, Read, Update, Delete — manually verified via Scalar UI on 2026-07-13)
 - [x] Git with regular commit history
 - [ ] Unit tests covering key backend components
-- [ ] Deployed backend
+- [x] Deployed backend — Azure App Service (F1 free tier),
+      https://walking-tracker-msa2026.azurewebsites.net
 - [x] Scalar API docs (instead of Swagger)
 
 ### Frontend

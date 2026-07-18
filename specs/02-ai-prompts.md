@@ -152,3 +152,38 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
     going forward since new records are always normalized server-side).
     Also found and fixed `QuizCard` never re-checking quiz eligibility after
     a new walking record was logged (its effect only depended on the token).
+
+## Session — 2026-07-15/16 (Claude Code)
+
+21. Deployed the backend to Azure App Service. Installed Azure CLI, walked the
+    user through `az login` (interactive, had to fall back to
+    `--use-device-code` after the native account-picker popup stalled) and
+    activating an Azure for Students subscription. Created a resource group,
+    F1 (free) Linux App Service plan, and web app in Australia East. First zip
+    deploy failed: PowerShell's `Compress-Archive` preserved Windows backslash
+    path separators for the SQLite package's per-platform `runtimes/<rid>/...`
+    folders, which broke rsync on the Linux host. Fixed by publishing with
+    `-r linux-x64 --self-contained false`, which drops the other platforms'
+    native binaries entirely and avoids the nested-folder problem.
+22. Second deploy attempt crash-looped and exhausted the F1 tier's daily CPU
+    quota (see `03-design-decisions.md` for the root cause — a missing
+    `/home/data` directory for the SQLite path). User didn't want to pay for a
+    higher tier; agreed to fix the actual bug (revert to the default in-app
+    `app.db` path) instead of upgrading. Redeploy after the fix started
+    successfully in 47s; verified register → login → add record → progress
+    end-to-end against the live URL via curl.
+23. User flagged a Discord message from an MSA organizer (Frank) clarifying
+    that env var/secret values must never be pushed to the repo — a sanitized
+    template is sufficient, real values go in the private submission-form
+    field. This caught a real issue: the JWT signing key had been committed in
+    plain text in `appsettings.json`. Moved it to local .NET User Secrets and
+    replaced the committed value with a placeholder. (The deployed instance
+    was already using a separately generated key set as an Azure App Setting,
+    so production was never actually exposed by this.)
+24. User requested layout changes after seeing the login screen: right-align
+    the header's theme/logout controls, make pages fill the viewport instead
+    of sitting in a fixed 600px column with empty space, and enlarge the login
+    card. Claude implemented all three directly (removed the global `<main>`
+    width cap now that each page sizes itself via Mantine `Container`/`Center`,
+    grouped header controls with `ml="auto"`, restyled `LoginForm` to center in
+    the full remaining height).

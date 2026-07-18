@@ -54,6 +54,29 @@
     accessibility, and replaces cash conversion with a tier/badge system. The
     quiz and streak mechanics don't exist in the real program; they're this
     project's own addition.
+- **Deployed backend to Azure App Service (F1 free tier)**, Australia East region
+  — nearest Azure region to NZ, no free tier there. Matches what MSA Phase 1
+  taught (Azure over Vercel/other hosts), and lets frontend + backend live in one
+  ecosystem once the frontend is deployed too. Auto-runs EF migrations on startup
+  (`db.Database.Migrate()`) since there's no way to SSH in and run `dotnet ef
+  database update` manually the way local dev does.
+- **JWT secret kept out of the committed `appsettings.json`** — moved to local
+  .NET User Secrets, with a placeholder left in the repo. Per MSA organizer
+  guidance in Discord (Frank, re: env vars): don't push actual secret values to
+  the repo, a sanitized template is sufficient, real values go in the private
+  submission-form field. The deployed instance uses its own separate key set
+  directly as an Azure App Setting, unrelated to whatever's in this repo's
+  history.
+- **F1 (free tier) quota exhaustion incident**: the first real deploy attempt
+  crash-looped for ~10 minutes because the app tried to open its SQLite file at
+  a path (`/home/data/app.db`, chosen for persistence across redeploys) whose
+  parent directory didn't exist yet, and F1's very small daily CPU-minute quota
+  got burned by the repeated restart attempts, disabling the site
+  (`state: QuotaExceeded`) until the next UTC-day reset. Rather than pay for a
+  higher tier, reverted to the simpler default (`Data Source=app.db`, inside the
+  app's own deployment folder) — data resets on every redeploy, which is an
+  accepted, documented limitation for this project's scope, but removes the
+  crash risk entirely since the folder always exists.
 - **Quiz eligibility keyed to the server's real current date, never to
   `WalkingRecord.Date`** — `GET /api/Quiz/today` only unlocks a question once a
   `WalkingRecord` exists for the exact real "today," and `LastQuizDate` (not the
