@@ -2,6 +2,22 @@ import { create } from 'zustand'
 
 const API_URL = import.meta.env.VITE_API_URL
 
+// JWTs are base64url-encoded, not plain base64 — swap the URL-safe characters
+// back before decoding, since the token isn't secret and we'd rather read the
+// display name from it than make an extra request.
+function decodeDisplayName(token: string): string | null {
+    try {
+        const payload = token.split('.')[1]
+        const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+        const json = JSON.parse(atob(base64))
+        return json.DisplayName ?? null
+    } catch {
+        return null
+    }
+}
+
+const initialToken = localStorage.getItem('token')
+
 interface WalkingRecord {
     id: number
     userName: string
@@ -22,10 +38,11 @@ interface UserProgress {
 
 interface AppState {
     token: string | null
+    displayName: string | null
     records: WalkingRecord[]
     progress: UserProgress | null
     login: (userName: string, password: string) => Promise<string | null>
-    register: (userName: string, password: string) => Promise<string | null>
+    register: (userName: string, password: string, displayName: string) => Promise<string | null>
     logout: () => void
     fetchRecords: () => Promise<void>
     fetchProgress: () => Promise<void>
@@ -33,7 +50,8 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-    token: localStorage.getItem('token'),
+    token: initialToken,
+    displayName: initialToken ? decodeDisplayName(initialToken) : null,
     records: [],
     progress: null,
 
@@ -48,28 +66,28 @@ export const useAppStore = create<AppState>((set, get) => ({
             return data.message ?? 'Login failed'
         }
         localStorage.setItem('token', data.token)
-        set({ token: data.token })
+        set({ token: data.token, displayName: decodeDisplayName(data.token) })
         return null
     },
 
-    register: async (userName, password) => {
+    register: async (userName, password, displayName) => {
         const res = await fetch(`${API_URL}/Auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userName, password }),
+            body: JSON.stringify({ userName, password, displayName }),
         })
         const data = await res.json()
         if (!res.ok) {
             return data.message ?? 'Registration failed'
         }
         localStorage.setItem('token', data.token)
-        set({ token: data.token })
+        set({ token: data.token, displayName: decodeDisplayName(data.token) })
         return null
     },
 
     logout: () => {
         localStorage.removeItem('token')
-        set({ token: null, records: [], progress: null })
+        set({ token: null, displayName: null, records: [], progress: null })
     },
 
     fetchRecords: async () => {

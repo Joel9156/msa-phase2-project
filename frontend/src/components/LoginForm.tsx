@@ -5,6 +5,7 @@ import { useAppStore } from '../store'
 function LoginForm() {
     const [mode, setMode] = useState<'login' | 'register'>('login')
     const [userName, setUserName] = useState('')
+    const [displayName, setDisplayName] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
 
@@ -14,8 +15,9 @@ function LoginForm() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         setError('')
-        const action = mode === 'login' ? login : register
-        const errorMessage = await action(userName, password)
+        const errorMessage = mode === 'login'
+            ? await login(userName, password)
+            : await register(userName, password, displayName)
         if (errorMessage) {
             setError(errorMessage)
         }
@@ -42,6 +44,15 @@ function LoginForm() {
                                 onChange={(e) => setUserName(e.target.value)}
                                 required
                             />
+                            {mode === 'register' && (
+                                <TextInput
+                                    label="Display Name"
+                                    description="What we'll call you in the app"
+                                    value={displayName}
+                                    onChange={(e) => setDisplayName(e.target.value)}
+                                    required
+                                />
+                            )}
                             <PasswordInput
                                 label="Password"
                                 value={password}

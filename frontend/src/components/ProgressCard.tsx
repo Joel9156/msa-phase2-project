@@ -4,6 +4,7 @@ import { useAppStore } from '../store'
 
 function ProgressCard() {
     const progress = useAppStore((state) => state.progress)
+    const displayName = useAppStore((state) => state.displayName)
     const fetchProgress = useAppStore((state) => state.fetchProgress)
 
     useEffect(() => {
@@ -17,7 +18,7 @@ function ProgressCard() {
     return (
         <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Group justify="space-between">
-                <Text fw={700} size="lg">{progress.userName}</Text>
+                <Text fw={700} size="lg">{displayName}</Text>
                 <Badge color="green">{progress.tier}</Badge>
             </Group>
             <Text mt="sm">Total Points: {progress.totalPoints}</Text>

@@ -14,6 +14,7 @@ public class AuthRequest
 {
     public string UserName { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
 }
 
 [ApiController]
@@ -38,13 +39,18 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "Username is required and password must be at least 8 characters." });
         }
 
+        if (string.IsNullOrWhiteSpace(request.DisplayName))
+        {
+            return BadRequest(new { message = "Display name is required." });
+        }
+
         var exists = await _context.Users.AnyAsync(u => u.UserName == request.UserName);
         if (exists)
         {
             return BadRequest(new { message = "Username already taken." });
         }
 
-        var user = new User { UserName = request.UserName };
+        var user = new User { UserName = request.UserName, DisplayName = request.DisplayName };
         user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
 
         _context.Users.Add(user);
@@ -75,7 +81,8 @@ public class AuthController : ControllerBase
     {
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, user.UserName)
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim("DisplayName", user.DisplayName)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
