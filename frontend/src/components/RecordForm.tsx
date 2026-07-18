@@ -24,7 +24,7 @@ function RecordForm() {
                     min={0}
                     required
                 />
-                <Button type="submit">Log Walk</Button>
+                <Button type="submit" variant="gradient">Log Walk</Button>
             </Group>
         </form>
     )

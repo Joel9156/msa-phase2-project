@@ -99,7 +99,7 @@ function QuizCard() {
                     <Radio value="D" label={question.optionD} />
                 </Stack>
             </Radio.Group>
-            <Button mt="md" disabled={!selected} onClick={handleSubmit}>
+            <Button mt="md" variant="gradient" disabled={!selected} onClick={handleSubmit}>
                 Submit Answer
             </Button>
         </Card>

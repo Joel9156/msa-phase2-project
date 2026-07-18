@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Card, Center, PasswordInput, SegmentedControl, Stack, TextInput, Text, Title } from '@mantine/core'
+import { Button, Card, Center, PasswordInput, SegmentedControl, Stack, TextInput, Text } from '@mantine/core'
 import { useAppStore } from '../store'
 
 function LoginForm() {
@@ -27,7 +27,16 @@ function LoginForm() {
         <Center mih="calc(100vh - 65px)" p="md">
             <Card shadow="md" padding="xl" radius="md" withBorder maw={480} w="100%">
                 <Stack gap="md">
-                    <Title order={2} ta="center">Walking Tracker</Title>
+                    <Text
+                        component="h2"
+                        ta="center"
+                        fw={800}
+                        size="28px"
+                        variant="gradient"
+                        gradient={{ from: 'teal', to: 'lime', deg: 45 }}
+                    >
+                        Walking Tracker
+                    </Text>
                     <SegmentedControl
                         value={mode}
                         onChange={(value) => setMode(value as 'login' | 'register')}
@@ -60,7 +69,7 @@ function LoginForm() {
                                 required
                             />
                             {error && <Text c="red" size="sm">{error}</Text>}
-                            <Button type="submit">{mode === 'login' ? 'Log In' : 'Register'}</Button>
+                            <Button type="submit" variant="gradient">{mode === 'login' ? 'Log In' : 'Register'}</Button>
                         </Stack>
                     </form>
                 </Stack>
