@@ -48,6 +48,8 @@ function ProgressCard() {
                     <Text
                         size="28px"
                         fw={800}
+                        lh={1.4}
+                        py={2}
                         variant="gradient"
                         gradient={{ from: 'teal', to: 'lime', deg: 45 }}
                     >
@@ -59,6 +61,8 @@ function ProgressCard() {
                     <Text
                         size="28px"
                         fw={800}
+                        lh={1.4}
+                        py={2}
                         variant="gradient"
                         gradient={{ from: 'teal', to: 'lime', deg: 45 }}
                     >
