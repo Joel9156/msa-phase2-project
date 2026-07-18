@@ -1,3 +1,6 @@
+# Large source images kept locally only (working copies in tiers/ are committed)
+frontend/src/assets/tiers/originals/
+
 # Logs
 logs
 *.log
