@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card, Text, Radio, Button, Alert, Stack } from '@mantine/core'
 import { useAppStore } from '../store'
 
-const API_URL = 'http://localhost:5000/api'
+const API_URL = import.meta.env.VITE_API_URL
 
 interface QuizQuestion {
     id: number
