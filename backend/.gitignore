@@ -1,4 +1,6 @@
 bin/
 obj/
+publish/
+*.zip
 *.db-shm
 *.db-wal
