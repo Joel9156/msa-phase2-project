@@ -32,10 +32,12 @@ function LoginForm() {
                         ta="center"
                         fw={800}
                         size="28px"
+                        lh={1.4}
+                        py={4}
                         variant="gradient"
                         gradient={{ from: 'teal', to: 'lime', deg: 45 }}
                     >
-                        Walking Tracker
+                        Green Footprint
                     </Text>
                     <SegmentedControl
                         value={mode}
