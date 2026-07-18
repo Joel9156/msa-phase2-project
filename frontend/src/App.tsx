@@ -4,6 +4,7 @@ import { useAppStore } from './store'
 import WalkingBoard from './WalkingBoard'
 import LoginForm from './components/LoginForm'
 import LandingPage from './components/LandingPage'
+import AboutPage from './components/AboutPage'
 import './App.css'
 
 function ThemeToggle() {
@@ -29,9 +30,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <header>
-        <h1>Green Footprint</h1>
+        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <h1>Green Footprint</h1>
+        </Link>
         <nav>
           {token && <NavLink to="/" end>My Records</NavLink>}
+          {token && <NavLink to="/about">About</NavLink>}
         </nav>
         <Group ml="auto">
           <ThemeToggle />
@@ -51,6 +55,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={token ? <WalkingBoard /> : <LandingPage />} />
           <Route path="/login" element={token ? <Navigate to="/" replace /> : <LoginForm />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </main>
     </BrowserRouter>

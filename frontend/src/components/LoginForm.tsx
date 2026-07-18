@@ -24,7 +24,7 @@ function LoginForm() {
     }
 
     return (
-        <Center mih="calc(100vh - 65px)" p="md">
+        <Center mih="calc(100vh - 56px)" p="md">
             <Card shadow="md" padding="xl" radius="md" withBorder maw={480} w="100%">
                 <Stack gap="md">
                     <Text

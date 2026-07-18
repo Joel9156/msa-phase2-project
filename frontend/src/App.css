@@ -12,19 +12,22 @@ body {
 
 
 header {
-  background: #1a1a2e;
+  background: linear-gradient(135deg, #0f5132 0%, #1b7a4d 100%);
   color: white;
-  padding: 16px 24px;
+  height: 56px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   gap: 32px;
+  overflow: visible;
 }
 
 header h1 {
-  font-size: 1.25rem;
+  font-size: 1.4rem;
+  font-weight: 800;
   color: white;
+  letter-spacing: 0.2px;
 }
-
 
 header nav {
   display: flex;
@@ -32,7 +35,7 @@ header nav {
 }
 
 header nav a {
-  color: #ccc;
+  color: #d7f5df;
   text-decoration: none;
   font-size: 0.95rem;
 }
@@ -40,12 +43,12 @@ header nav a {
 header nav a.active {
   color: white;
   font-weight: 600;
-  border-bottom: 2px solid #e94560;
+  border-bottom: 2px solid #a3e635;
   padding-bottom: 2px;
 }
 
 main {
-  min-height: calc(100vh - 65px);
+  min-height: calc(100vh - 56px);
 }
 
 h2 {
@@ -75,6 +78,23 @@ button:hover {
 
 ol {
   padding-left: 20px;
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-letter {
+  display: inline-block;
+  opacity: 0;
+  animation: step-in 0.4s ease forwards;
 }
 
 ol li {
