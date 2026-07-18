@@ -45,9 +45,7 @@ header nav a.active {
 }
 
 main {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 0 16px;
+  min-height: calc(100vh - 65px);
 }
 
 h2 {

@@ -1,5 +1,5 @@
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { useMantineColorScheme, useComputedColorScheme, ActionIcon, Button } from '@mantine/core'
+import { useMantineColorScheme, useComputedColorScheme, ActionIcon, Button, Group } from '@mantine/core'
 import { useAppStore } from './store'
 import WalkingBoard from './WalkingBoard'
 import LoginForm from './components/LoginForm'
@@ -32,12 +32,14 @@ export default function App() {
         <nav>
           <NavLink to="/" end>My Records</NavLink>
         </nav>
-        <ThemeToggle />
-        {token && (
-          <Button variant="subtle" color="gray.3" style={{ color: 'white' }} onClick={logout}>
-            Log Out
-          </Button>
-        )}
+        <Group ml="auto">
+          <ThemeToggle />
+          {token && (
+            <Button variant="subtle" color="gray.3" style={{ color: 'white' }} onClick={logout}>
+              Log Out
+            </Button>
+          )}
+        </Group>
       </header>
 
       <main>
