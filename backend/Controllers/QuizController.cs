@@ -3,6 +3,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
 
 
 namespace backend.Controllers;
@@ -19,16 +20,19 @@ public class QuizAnswerRequest
 public class QuizController : ControllerBase
 
 {
-    private readonly AppDbContext _context;
 
     private const int DailyGoalSteps = 6000;
     private const int DailyGoalPoints = 10;
     private const double QuizBonusMultiplier = 0.3; // extra 30% on top of today's walking points
+    private readonly AppDbContext _context;
+    private readonly IMemoryCache _cache;
 
-    public QuizController(AppDbContext context)
+    public QuizController(AppDbContext context, IMemoryCache cache)
     {
         _context = context;
+        _cache = cache;
     }
+
 
     // [Read] Get today's quiz question for this user, if they're eligible.
     // A user is only eligible once they've logged a walking record for today,
@@ -56,18 +60,27 @@ public class QuizController : ControllerBase
             return Ok(new { status = "already_completed" });
         }
 
-        var questionCount = await _context.QuizQuestions.CountAsync();
-        if (questionCount == 0)
+        var cacheKey = $"quiz-{today:yyyyMMdd}";
+
+        if (!_cache.TryGetValue(cacheKey, out QuizQuestion? question))
         {
-            return Ok(new { status = "no_questions_available" });
+            var questionCount = await _context.QuizQuestions.CountAsync();
+            if (questionCount == 0)
+            {
+                return Ok(new { status = "no_questions_available" });
+            }
+
+            var todayIndex = today.DayOfYear % questionCount;
+            question = await _context.QuizQuestions
+                .OrderBy(q => q.Id)
+                .Skip(todayIndex)
+                .FirstAsync();
+
+            _cache.Set(cacheKey, question, TimeSpan.FromHours(24));
         }
 
-        var todayIndex = today.DayOfYear % questionCount;
-        var question = await _context.QuizQuestions
-            .OrderBy(q => q.Id)
-            .Skip(todayIndex)
-            .FirstAsync();
 
+        question ??= null!; 
         return Ok(new
         {
             status = "ready",
