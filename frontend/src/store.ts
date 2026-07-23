@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL
 // JWTs are base64url-encoded, not plain base64 — swap the URL-safe characters
 // back before decoding, since the token isn't secret and we'd rather read the
 // display name from it than make an extra request.
-function decodeDisplayName(token: string): string | null {
+export function decodeDisplayName(token: string): string | null {
     try {
         const payload = token.split('.')[1]
         const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
@@ -117,7 +117,7 @@ export const useAppStore = create<AppState>((set, get) => ({
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({
+            body: JSON.stringify({  
                 steps,
                 earnedPoints: 0,
                 date: new Date().toISOString(),
