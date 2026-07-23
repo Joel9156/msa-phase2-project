@@ -129,7 +129,7 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
     "type anyone's name" impersonation gap), and ownership checks added to
     `WalkingController`'s PUT/DELETE. User did the model/DbContext/migration
     steps and the `WalkingController`/`QuizController` `[Authorize]` edits
-    themselves (with Claude fixing a couple of paste-order mistakes);
+    themselves (with Claude fixing a couple of manual integration errors);
     Claude built `AuthController`, the JWT middleware config, and
     `UserProgressController`'s change, and verified end-to-end via curl.
 19. Wired the frontend to the new auth: `store.ts` holds a JWT (persisted to
@@ -137,7 +137,7 @@ frontend scaffold in progress) plus the MSA Phase 2 assessment PDF.
     component, `App.tsx` gates the app behind the token. User built
     `LoginForm` and most of the `store.ts`/`QuizCard.tsx` edits from
     step-by-step instructions; Claude wired `App.tsx` directly after it broke
-    from paste-ordering mistakes twice on an earlier (pre-auth) edit.
+    from manual integration errors twice on an earlier (pre-auth) edit.
 20. User tested in the browser and found two real bugs beyond what curl
     testing had caught: (a) logging steps multiple times a day created
     separate records instead of accumulating, so hitting the goal via two

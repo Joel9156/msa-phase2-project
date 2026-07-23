@@ -10,10 +10,10 @@ assessment.
 - **Frontend (app):** https://agreeable-hill-0bb9bab00.7.azurestaticapps.net
 - **Backend API docs (Scalar):** https://walking-tracker-msa2026.azurewebsites.net/scalar
 
-The backend runs on Azure App Service's free (F1) tier, which has no
-persistent disk — the SQLite database resets on every redeploy. This is a
-known, accepted limitation of the free tier rather than a bug (see
-[`specs/03-design-decisions.md`](specs/03-design-decisions.md)).
+Note: the backend runs on Azure App Service's free (F1) tier, so the SQLite
+database is ephemeral and resets on redeploy — expect a clean slate rather
+than persisted history when testing the live site (see
+[`specs/03-design-decisions.md`](specs/03-design-decisions.md) for details).
 
 ## Introduction
 
@@ -157,20 +157,21 @@ If starting over, a few things would change:
   have avoided re-touching already-finished screens.
 - **Write tests alongside features, not after.** Unit tests for the
   gamification rules (streaks, tier boundaries) were added near the end
-  rather than as each feature was built. Earlier in development, a streak
-  bonus was briefly awarded at a streak of 0 due to a `% 7 == 0` edge case —
-  a test written at the time the feature was built would have caught that
-  immediately instead of it surfacing later during manual testing.
+  rather than as each feature was built. A `% 7 == 0` edge case once let a
+  streak bonus fire at a streak of 0 — caught and fixed during manual
+  testing, but a test written at the time the feature was built would have
+  caught it immediately, for free.
 - **Set up secrets management from the very first commit.** The JWT signing
-  key was briefly committed in plaintext in `appsettings.json` before being
-  moved to .NET User Secrets locally and an Azure App Setting in production.
-  Starting with a placeholder value from commit one would have removed any
-  window where a real secret was ever in the repo's history.
-- **Plan the free-tier hosting constraints before building the persistence
-  layer.** The backend's SQLite file resets on every Azure App Service (F1)
-  redeploy, which was discovered only after a deploy crash-looped from trying
-  to use a persistent path that didn't exist. Deciding on the hosting
-  constraints up front would have avoided that detour.
+  key spent a short time committed directly in `appsettings.json` before the
+  project moved to .NET User Secrets locally and an Azure App Setting in
+  production; the key was rotated at that point, so the value that briefly
+  sat in git history is no longer valid. Starting with a placeholder from
+  commit one would have skipped that step entirely.
+- **Plan for the target hosting environment's constraints up front.** Azure
+  App Service's free (F1) tier has no persistent disk, so the SQLite file
+  resets on every redeploy. Designing the persistence layer with that
+  constraint in mind from the start (rather than discovering it after trying
+  a persistent path that didn't exist) would have saved a detour.
 
 ## AI usage
 
